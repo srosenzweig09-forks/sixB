@@ -384,6 +384,10 @@ int main(int argc, char** argv)
     const auto start_loop_t = chrono::high_resolution_clock::now();
 	
 	TH1F* h_n_events = new TH1F("n_events","n_events",1,0,1);
+
+    N_total = 0;
+    N_trigger = 0;
+    N_jets = 0;
 	
     for (int iEv = 0; true; ++iEv)
     {
