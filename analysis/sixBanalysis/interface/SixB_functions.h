@@ -74,8 +74,12 @@ public:
   // create vector of all higgs resonances 
   std::vector<DiJet> get_tri_higgs_D_HHH(std::vector<Jet>& in_jets);
 
+  std::vector<Jet> get_6jet_top(std::vector<Jet>& in_jets);
   std::vector<Jet> get_6jet_NN(EventInfo& ei,std::vector<Jet>& in_jets,EvalNN& n_6j_classifier);
-  std::vector<DiJet> get_2jet_NN(EventInfo& ei,std::vector<Jet>& in_jets,std::vector<Jet>& sup_jets,EvalNN& n_2j_classifier);
+
+  
+  std::vector<DiJet> get_2jet_NN(EventInfo& ei,std::vector<Jet>& in_jets,EvalNN& n_2j_classifier);
+  std::vector<DiJet> get_3dijet_NN(EventInfo& ei,std::vector<Jet>& in_jets,EvalNN& n_3d_classifier);
   std::vector<DiJet> get_tri_higgs_NN(EventInfo& ei,std::vector<Jet>& in_jets,EvalNN& n_6j_classifier,EvalNN& n_2j_classifier);
 
   // passes event if all dijets mass is greater than 30 from higgs mass
@@ -84,6 +88,9 @@ public:
   ////////////////////////////////////////////////////
   /// other jet utilities
   ////////////////////////////////////////////////////
+
+  // counts how many valid gen higgs are in the in_dijets collection
+  int n_gjmatched_in_dijetcoll(const std::vector<DiJet>& in_dijets);
 
   // counts how many of the valid genjets in the ei (matched to b quarks) are in the in_jets collection
   int n_gjmatched_in_jetcoll(NanoAODTree& nat, EventInfo& ei, const std::vector<Jet>& in_jets);

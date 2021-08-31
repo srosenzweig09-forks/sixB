@@ -40,8 +40,7 @@ struct EventInfo{
   boost::optional<int>    n_nn_higgs;
 
   boost::optional<float>  b_6j_score;
-  boost::optional<std::vector<float>> b_2j_scores;
-  boost::optional<float>  b_3h_score;
+  boost::optional<float>  b_3d_score;
 
   boost::optional<GenPart>  gen_X_fc; // first copy at LHE
   boost::optional<GenPart>  gen_X;
@@ -90,7 +89,9 @@ struct EventInfo{
 
   boost::optional< std::vector<GenJet> > genjet_list;
   boost::optional< std::vector<Jet> > jet_list;
-  boost::optional< std::vector<DiJet> > higgs_list;
+  boost::optional< std::vector<Jet> > t6_jet_list;
+  boost::optional< std::vector<Jet> > nn_jet_list;
+  boost::optional< std::vector<DiJet> > t6_higgs_list;
   boost::optional< std::vector<DiJet> > nn_higgs_list;
 
   boost::optional<EventShapes> event_shapes;

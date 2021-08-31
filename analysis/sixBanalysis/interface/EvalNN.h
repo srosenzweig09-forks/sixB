@@ -21,10 +21,11 @@ public:
 	 std::string graphPath,
 	 std::string input_name = "dense_input",
 	 std::string modelName = "model.pb",
-	 std::string configName = "config.cfg"
+	 std::string configName = "model.cfg"
 	 ) ;
   ~EvalNN();
   std::vector<float> evaluate (const std::vector<float>& inputs);
+  void set_output(std::string output) { outputs_name_ = {output}; }
   void set_debug(bool debug) { debug_ = debug; }
 
 private:
