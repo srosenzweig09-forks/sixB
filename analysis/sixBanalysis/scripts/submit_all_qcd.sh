@@ -1,4 +1,4 @@
-ODIR="/store/user/ekoenig/6BAnalysis/NTuples/2018/"
+ODIR="/store/user/srosenzw/qcd_bkgd/"
 
 . scripts/arg_submit.sh -v qcd "$@"
 TAG="${TAG}QCD"
