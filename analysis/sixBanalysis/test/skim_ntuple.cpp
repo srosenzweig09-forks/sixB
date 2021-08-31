@@ -495,6 +495,26 @@ int main(int argc, char** argv)
 	loop_timer.click("JEC + JER");
       }
 
+      const double pt_min  = 20.;
+      const double eta_max = 2.5;
+      // const double btag_min = btag_WPs.at(0);
+      const int    pf_id   = 1;
+      const int    pu_id   = 1;
+
+      for (unsigned int ij = 0; ij < in_jets.size(); ++ij)
+        {
+          const Jet& jet = in_jets.at(ij);
+          if (jet.get_pt()            <= pt_min)  continue;
+      cutflow.add("pT < 20 GeV")
+          if (std::abs(jet.get_eta()) >= eta_max) continue;
+      cutflow.add("|eta| < 2.5")
+          // if (jet.get_btag() <= btag_min) continue;
+          if (!checkBit(jet.get_id(), pf_id)) continue;
+      cutflow.add("jetID")
+          if (!checkBit(jet.get_puid(),  pu_id)) continue;
+      cutflow.add("PUID")
+        }
+
       std::vector<Jet> presel_jets = sbf.preselect_jets   (nat, all_jets);
       sbf.btag_bias_pt_sort(presel_jets);
       int n_presel_jet = presel_jets.size();
