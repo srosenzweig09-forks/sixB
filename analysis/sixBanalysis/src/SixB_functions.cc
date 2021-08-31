@@ -240,16 +240,16 @@ void SixB_functions::match_genjets_to_reco(std::vector<GenJet>& genjets,std::vec
       Jet& jet = recojets.at(ireco);
       int gen_match = -1;
       for (unsigned int igen = 0; igen < genjets.size(); igen++)
-	{
-	  GenJet& genjet = genjets.at(igen);
-			
-	  if (genjet.getIdx() == get_property(jet,Jet_genJetIdx))
-	    {
-	      gen_match = igen;
-	      break;
-	    }
-      
-	}
+      {
+        GenJet& genjet = genjets.at(igen);
+          
+        if (genjet.getIdx() == get_property(jet,Jet_genJetIdx))
+          {
+            gen_match = igen;
+            break;
+          }
+          
+      }
       if (gen_match != -1) {
 	recojets.at(ireco).set_genIdx(gen_match);
 	genjets.at(gen_match).set_recoIdx(ireco);
