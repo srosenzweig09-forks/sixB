@@ -298,11 +298,11 @@ std::vector<Jet> SixB_functions::preselect_jets(NanoAODTree& nat, const std::vec
   for (unsigned int ij = 0; ij < in_jets.size(); ++ij)
     {
       const Jet& jet = in_jets.at(ij);
-      if (jet.get_pt()            <= pt_min)  continue;
-      if (std::abs(jet.get_eta()) >= eta_max) continue;
-      // if (jet.get_btag() <= btag_min) continue;
-      if (!checkBit(jet.get_id(), pf_id)) continue;
-      if (!checkBit(jet.get_puid(),  pu_id)) continue;
+      // if (jet.get_pt()            <= pt_min)  continue;
+      // if (std::abs(jet.get_eta()) >= eta_max) continue;
+      // // if (jet.get_btag() <= btag_min) continue;
+      // if (!checkBit(jet.get_id(), pf_id)) continue;
+      // if (!checkBit(jet.get_puid(),  pu_id)) continue;
 
       out_jets.emplace_back(jet);
     }
