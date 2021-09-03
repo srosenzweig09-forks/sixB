@@ -17,6 +17,9 @@ class SixB_functions{
     
 public:
 
+template <typename T>
+  bool checkBit(T value, int bitpos) {T unit = 1; return value & (unit << bitpos);}
+
   ////////////////////////////////////////////////////
   /// gen objects functions
   ////////////////////////////////////////////////////
@@ -145,9 +148,6 @@ private:
   // if throw = true, throws an error if none could be assigned
   template <typename T>
   bool assign_to_uninit(T value, std::initializer_list<boost::optional<T>*> targets, bool do_throw = true);
-
-  template <typename T>
-  bool checkBit(T value, int bitpos) {T unit = 1; return value & (unit << bitpos);}
 
   // finds the index of the jet that was matched in nanoAOD to the input genjet
   int find_jet_from_genjet (NanoAODTree& nat, const GenJet& gj);
