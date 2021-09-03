@@ -458,7 +458,7 @@ int main(int argc, char** argv)
       // ------- events can start be filtered from here (after saving all gen weights)
         
       // trigger requirements
-      if (apply_trigger && !(nat.getTrgOr()) )
+      // if (apply_trigger && !(nat.getTrgOr()) )
 	// continue;
       cutflow.add("trigger");
         
@@ -609,12 +609,12 @@ int main(int argc, char** argv)
       }
 
       if (skim_type == ksixb){
-	if (presel_jets.size() < 6)
-	  continue;
+	// if (presel_jets.size() < 6)
+	//   continue;
 	cutflow.add("npresel_jets>=6");
 
-	if ( applyJetCuts && !sbf.pass_jet_cut(cutflow,pt_cuts,btagWP_cuts,presel_jets) )
-	  continue;
+	// if ( applyJetCuts && !sbf.pass_jet_cut(cutflow,pt_cuts,btagWP_cuts,presel_jets) )
+	//   continue;
             
 	std::vector<Jet> sixb_jets = sbf.select_sixb_jets(nat, presel_jets);
 	int nfound_sixb = sbf.n_gjmatched_in_jetcoll(nat, ei, sixb_jets);
@@ -640,7 +640,7 @@ int main(int argc, char** argv)
             
 	loop_timer.click("Higgs CR selection");
       }
-
+ 
       if (skim_type == kttbar){
 	if (presel_jets.size() < 2)
 	  continue;
