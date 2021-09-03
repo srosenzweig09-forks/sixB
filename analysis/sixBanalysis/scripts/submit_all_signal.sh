@@ -1,4 +1,4 @@
-ODIR="/store/user/srosenzw/sixb_ntuples"
+ODIR="/store/user/srosenzw/signal_exploration"
 
 . scripts/arg_submit.sh -v sr "$@"
 TAG="${TAG}NMSSM"

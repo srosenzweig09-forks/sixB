@@ -1,6 +1,6 @@
-ODIR="/store/user/srosenzw/qcd_bkgd/"
+ODIR="/store/user/srosenzw/analysis"
 
-. scripts/arg_submit.sh -v qcd "$@"
+. scripts/arg_submit.sh -v sr "$@"
 TAG="${TAG}QCD"
 
 make exe -j || exit -1
