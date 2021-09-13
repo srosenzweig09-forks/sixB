@@ -549,6 +549,8 @@ int main(int argc, char** argv)
 	ei.n_higgs = all_higgs.size();
 	ei.t6_higgs_list = all_higgs;
 
+  ei.t6_jet_list = t6_jet_list;
+
 	ei.n_nn_higgs = nn_higgs.size();
 	ei.nn_higgs_list = nn_higgs;
       }
