@@ -1,5 +1,7 @@
 """
 This script will populate a text file with all ROOT files available in a given CRAB output directory.
+
+python write_input_file.py --dir /store/group/lpchbb/srosenzw/XYH_YToHH/CRAB_PrivateMC/srosenzw_NMSSM_XYH_YToHH_6b_MX_700_MY_400_sl7_nano_100k/210315_163248/
 """
 
 from argparse import ArgumentParser
