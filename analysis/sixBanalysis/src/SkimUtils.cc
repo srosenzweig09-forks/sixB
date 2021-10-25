@@ -72,9 +72,10 @@ using namespace std;
     ot.OBJ ## _qgl.push_back( jet.get_qgl() );			\
     ot.OBJ ## _id.push_back( jet.get_id() );			\
     ot.OBJ ## _puid.push_back( jet.get_puid() );		\
-    ot.OBJ ## _preselIdx.push_back( jet.get_preselIdx() );	\
   }								\
 }
+    // THIS WAS TAKEN FROM THE ABOVE MACRO - BOTTOM LINE
+    // ot.OBJ ## _preselIdx.push_back( jet.get_preselIdx() );	\
 
 #define COPY_OPTIONAL_dijet_list(OBJ)				\
   if (ei.OBJ ## _list) {					\
@@ -84,8 +85,11 @@ using namespace std;
     ot.OBJ ## _pt.push_back( dijet.Pt() );			\
     ot.OBJ ## _eta.push_back( dijet.Eta() );			\
     ot.OBJ ## _phi.push_back( dijet.Phi() );			\
+    ot.OBJ ## _dr.push_back( dijet.dR() );			\
     ot.OBJ ## _signalId.push_back( dijet.get_signalId() );	\
     ot.OBJ ## _2j_score.push_back( dijet.get_2j_score() );	\
+    ot.OBJ ## _id1.push_back( dijet.get_id1() );	\
+    ot.OBJ ## _id2.push_back( dijet.get_id2() );	\
   }								\
 }
 
@@ -121,6 +125,10 @@ void SkimUtils::fill_output_tree(OutputTree& ot, NanoAODTree& nat, EventInfo& ei
   ot.LumiSec  = *ei.LumiSec;
   ot.Event    = *ei.Event;
 
+  if(ei.scores_6j)      ot.scores_6j       = *ei.scores_6j;
+  if(ei.mass_6j)      ot.mass_6j       = *ei.mass_6j;
+  if(ei.sixb_combo)      ot.sixb_combo       = *ei.sixb_combo;
+
   if(ei.n_other_pv)     ot.n_other_pv      = *ei.n_other_pv;
   if(ei.n_pu)           ot.n_pu            = *ei.n_pu;
   if(ei.n_true_int)     ot.n_true_int      = *ei.n_true_int;
@@ -129,17 +137,18 @@ void SkimUtils::fill_output_tree(OutputTree& ot, NanoAODTree& nat, EventInfo& ei
   if(ei.n_jet)          ot.n_jet           = *ei.n_jet;
   if(ei.n_total_jet)    ot.n_total_jet     = *ei.n_total_jet;
   if(ei.n_genjet)       ot.n_genjet        = *ei.n_genjet;
-  if(ei.n_higgs)        ot.n_higgs      = *ei.n_higgs;
+  if(ei.n_higgs)        ot.n_higgs         = *ei.n_higgs;
 
-  if(ei.b_6j_score)     ot.b_6j_score      = *ei.b_6j_score;
-  if(ei.b_3d_score)     ot.b_3d_score      = *ei.b_3d_score;
+  // if(ei.b_6j_score)     ot.b_6j_score      = *ei.b_6j_score;
+  // if(ei.b_3d_score)     ot.b_3d_score      = *ei.b_3d_score;
 
   COPY_OPTIONAL_jet_list(jet);
-  COPY_OPTIONAL_jet_list(t6_jet);
-  COPY_OPTIONAL_jet_list(nn_jet);
+  // COPY_OPTIONAL_jet_list(t6_jet);
+  // COPY_OPTIONAL_jet_list(nn_jet);
 
-  COPY_OPTIONAL_dijet_list(t6_higgs);
-  COPY_OPTIONAL_dijet_list(nn_higgs);
+  COPY_OPTIONAL_dijet_list(dijet);
+  // COPY_OPTIONAL_dijet_list(t6_higgs);
+  // COPY_OPTIONAL_dijet_list(nn_higgs);
 
   if (ei.genjet_list) {
     for (GenJet& jet : ei.genjet_list.get()) {
@@ -155,11 +164,17 @@ void SkimUtils::fill_output_tree(OutputTree& ot, NanoAODTree& nat, EventInfo& ei
     }
   }
 
-  if (ei.event_shapes) {
-    ot.sphericity = ei.event_shapes.get().sphericity;
-    ot.sphericity_t = ei.event_shapes.get().transverse_sphericity;
-    ot.aplanarity = ei.event_shapes.get().aplanarity;
-  }
+  // if (ei.t6_event_shapes) {
+  //   ot.t6_sphericity = ei.t6_event_shapes.get().sphericity;
+  //   ot.t6_sphericity_t = ei.t6_event_shapes.get().transverse_sphericity;
+  //   ot.t6_aplanarity = ei.t6_event_shapes.get().aplanarity;
+  // }
+  
+  // if (ei.nn_event_shapes) {
+  //   ot.nn_sphericity = ei.nn_event_shapes.get().sphericity;
+  //   ot.nn_sphericity_t = ei.nn_event_shapes.get().transverse_sphericity;
+  //   ot.nn_aplanarity = ei.nn_event_shapes.get().aplanarity;
+  // }
 
   COPY_OPTIONAL_m_pt_eta_phi_p4(gen_X_fc);
   COPY_OPTIONAL_m_pt_eta_phi_p4(gen_X);

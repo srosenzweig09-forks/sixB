@@ -70,7 +70,7 @@ typedef ROOT::Math::PtEtaPhiMVector p4_t;
   std::vector<float> OBJ ## _qgl;		\
   std::vector<int>   OBJ ## _id;		\
   std::vector<int>   OBJ ## _puid;		\
-  std::vector<int> OBJ ## _preselIdx;
+  // std::vector<int> OBJ ## _preselIdx;
 
 #define DECLARE_dijet_list(OBJ)			\
   std::vector<float> OBJ ## _pt;		\
@@ -78,8 +78,11 @@ typedef ROOT::Math::PtEtaPhiMVector p4_t;
   std::vector<float> OBJ ## _phi;		\
   std::vector<float> OBJ ## _m;			\
   std::vector<float> OBJ ## _E;			\
+  std::vector<float> OBJ ## _dr;		\
   std::vector<int>   OBJ ## _signalId;		\
-  std::vector<float> OBJ ## _2j_score;		
+  std::vector<float> OBJ ## _2j_score;		\
+  std::vector<float> OBJ ## _id1;		\
+  std::vector<float> OBJ ## _id2;		
   
 
 class OutputTree : public BaseOutTree {
@@ -125,13 +128,13 @@ public:
   int n_jet;
   int n_higgs;
 
+  std::vector<float> scores_6j;
+  std::vector<float> mass_6j;
+  std::vector<int> sixb_combo;
+
   float b_6j_score;
   float b_3d_score;
 
-  float sphericity;
-  float sphericity_t;
-  float aplanarity;
-	
   std::vector<float> genjet_E;	    
   std::vector<float> genjet_m;		
   std::vector<float> genjet_pt;		
@@ -143,11 +146,18 @@ public:
   std::vector<int> genjet_recoIdx;
 
   DECLARE_jet_list(jet);
-  DECLARE_jet_list(t6_jet);
-  DECLARE_jet_list(nn_jet);
+  // DECLARE_jet_list(t6_jet);
+  // float t6_sphericity;
+  // float t6_sphericity_t;
+  // float t6_aplanarity;
+  // DECLARE_jet_list(nn_jet);
+  // float nn_sphericity;
+  // float nn_sphericity_t;
+  // float nn_aplanarity;
 
-  DECLARE_dijet_list(t6_higgs);
-  DECLARE_dijet_list(nn_higgs);
+  DECLARE_dijet_list(dijet);
+  // DECLARE_dijet_list(t6_higgs);
+  // DECLARE_dijet_list(nn_higgs);
 
   DECLARE_m_pt_eta_phi_p4(gen_X_fc);
   DECLARE_m_pt_eta_phi_p4(gen_X);

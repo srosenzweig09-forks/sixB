@@ -23,15 +23,18 @@ namespace su = SkimUtils;
 #include "SixB_functions.h"
 #include "JetTools.h"
 #include "BtagSF.h"
-#include "EventShapeCalculator.h"
+// #include "EventShapeCalculator.h"
 #include "Cutflow.h"
+// #include "Classifier.h"
 #include "EvalNN.h"
+#include "BuildClassifierInput.h"
 
 #include "Timer.h"
 
 #include "TFile.h"
 #include "TROOT.h"
 #include "TH1F.h"
+#include "TH2F.h"
 
 using namespace std;
 
@@ -139,7 +142,7 @@ int main(int argc, char** argv)
       kttbar,
       kshapecr,
       khiggscr,
-      kqcd,
+      kpass,
       knull
     };
 
@@ -150,7 +153,7 @@ int main(int argc, char** argv)
                                skim_type_name == "ttbar"   ? kttbar   :
                                skim_type_name == "shapecr" ? kshapecr :
                                skim_type_name == "higgscr" ? khiggscr :
-                               skim_type_name == "qcd"     ? kqcd     :
+                               skim_type_name == "pass"     ? kpass     :
                                knull
                                );
   if (skim_type == knull)
@@ -204,11 +207,11 @@ int main(int argc, char** argv)
   for (auto & trigger : triggerAndNameVector)
     {
       if(trigger == "")
-	continue;
+        continue;
         
       std::vector<std::string> triggerTokens = split_by_delimiter(trigger, ":");
       if (triggerTokens.size() != 2)
-	throw std::runtime_error("** skim_ntuple : could not parse trigger entry " + trigger + " , aborting");
+        throw std::runtime_error("** skim_ntuple : could not parse trigger entry " + trigger + " , aborting");
 
       triggerVector.push_back(triggerTokens[1]);
       cout << "   - " << triggerTokens[0] << "  ==> " << triggerTokens[1] << endl;
@@ -265,8 +268,12 @@ int main(int argc, char** argv)
                 });
 
   ot.declareUserIntBranch("nfound_all",    0);
-  ot.declareUserIntBranch("nfound_presel", 0);
+  // ot.declareUserIntBranch("nfound_presel", 0);
   ot.declareUserIntBranch("nfound_sixb",   0);
+  // ot.declareUserIntBranch("nfound_t6",   0);
+  // ot.declareUserIntBranch("nfound_t6_h",   0);
+  // ot.declareUserIntBranch("nfound_nn",   0);
+  // ot.declareUserIntBranch("nfound_nn_h",   0);
 
   if (save_trg_decision) {
     for (auto& tname : triggerVector)
@@ -329,7 +336,8 @@ int main(int argc, char** argv)
   ot.declareUserIntBranch("nmedium_btag", 0);
   ot.declareUserIntBranch("ntight_btag",  0);
 
-  ot.declareUserFloatBranch("jet6_btagsum", 0.0);
+  // ot.declareUserFloatBranch("t6_jet_btagsum", 0.0);
+  // ot.declareUserFloatBranch("nn_jet_btagsum", 0.0);
 
   BtagSF btsf;
   if (!is_data){
@@ -354,8 +362,13 @@ int main(int argc, char** argv)
   string f_2j_classifier = config.readStringOpt("configurations::2jet_classifier");
   string f_6j_classifier = config.readStringOpt("configurations::6jet_classifier");
 
-  EvalNN n_2j_classifier(f_2j_classifier);
-  EvalNN n_6j_classifier(f_6j_classifier);
+  EvalNN n_2j_classifier("n_2j_classifier",f_2j_classifier);
+  // EvalNN n_3d_classifier("n_3d_classifier",f_3d_classifier);
+  EvalNN n_6j_classifier("n_6j_classifier",f_6j_classifier);
+
+  n_2j_classifier.write(outputFile);
+  // n_3d_classifier.write(outputFile);
+  n_6j_classifier.write(outputFile);
 
   cout << "[INFO] Loading 2 Jet Classifier: " << f_2j_classifier << endl;
   cout << "[INFO] Loading 6 Jet Classifier: " << f_6j_classifier << endl;
@@ -409,28 +422,44 @@ int main(int argc, char** argv)
   const auto start_loop_t = chrono::high_resolution_clock::now();
 
   Cutflow cutflow;
-    
+// TH1F h = TH1F("h_6j","6-jet Classifier Distribution",100,0,1);
+// // 6j scores of combinations containing correct jets
+// TH1F h_s = TH1F("h_6j_s","6b Combo Score Distribution",100,0,1);
+// // 6j high scores of combinations containing correct jets
+// TH1F h_s_hi = TH1F("h_6j_s_high","6b Combo Score Distribution",100,0,1);
+// TH1F h_top6_score = TH1F("h_top6_score","6b Combo Score Distribution",100,0,1);
+// TH1F h_top6_signal = TH1F("h_top6_signal","6b Combo Score Distribution",100,0,1);
+// TH1F h_top6_nn_score = TH1F("h_top6_nn_score","6b Combo Score Distribution",100,0,1);
+// TH2F h_mass_score = TH2F("h_mass_incorrect_score", "6b Combo Mass v. Score",100,0,1000,100,0,1);    
+// // score of correct jet combo but not necessarily highest
+// TH2F h_mass_score_s = TH2F("h_mass_correct_score", "6b Combo Mass v. Score",100,400,1000,100,0,1);
+// // 2j scores
+// TH1F h2_incorrect = TH1F("h_2j_incorrect","2-jet Classifier Distribution",100,0,1);
+// TH1F h2_correct = TH1F("h_2j_correct","2-jet Classifier Distribution",100,0,1);
+// TH1F h3d_incorrect = TH1F("h_3d_incorrect","3d Classifier Distribution",100,0,1);
+// TH1F h3d_correct = TH1F("h_3d_correct","3d Classifier Distribution",100,0,1);
+
   for (int iEv = 0; true; ++iEv)
     {
       if (maxEvts >= 0 && iEv >= maxEvts)
-	break;
+        break;
 
       loop_timer.start_lap();
 
       if (!nat.Next()) break;
       if (iEv % 10000 == 0) {
-	cout << "... processing event " << iEv << endl;
-	// auto bsize  = ot.getTree()->GetBranch("Run")->GetBasketSize();
-	// cout << "... tree basket size (branch Run) : " << bsize  << endl;
+        cout << "... processing event " << iEv << endl;
+        // auto bsize  = ot.getTree()->GetBranch("Run")->GetBasketSize();
+        // cout << "... tree basket size (branch Run) : " << bsize  << endl;
       }
       // use the tree content to initialise weight tree in the first event
       if (iEv == 0 && !is_data){
-	// nwt.init_weights(nat, pu_data); // get the syst structure from nanoAOD
-	su::init_gen_weights(ot, nwt);  // and forward it to the output tree
+        // nwt.init_weights(nat, pu_data); // get the syst structure from nanoAOD
+        su::init_gen_weights(ot, nwt);  // and forward it to the output tree
       }
 
       if (is_data && !jlf.isValid(*nat.run, *nat.luminosityBlock)){
-	continue; // not a valid lumi
+        continue; // not a valid lumi
       }
 
       EventInfo ei;
@@ -441,31 +470,31 @@ int main(int argc, char** argv)
       loop_timer.click("Input read");
 
       if (!is_data){
-	// nwt.read_weights(nat);
-	// example to fill user weights
-	// auto& w1 = nwt.get_weight("test1");
-	// auto& w2 = nwt.get_weight("test2");
-	// auto& w3 = nwt.get_weight("test3");
-	// w1.w = iEv;
-	// w2.w = 10*iEv;
-	// w3.w = 100*iEv;
-	// w1.syst_val = {iEv + 1., iEv - 1.};
-	// w2.syst_val = {10. * iEv - 10, 10. * iEv - 20, 10. * iEv - 30};
-	// w3.syst_val = {};
-	// nwt.fill();
-	// loop_timer.click("Norm weight read + fill");
+        // nwt.read_weights(nat);
+        // example to fill user weights
+        // auto& w1 = nwt.get_weight("test1");
+        // auto& w2 = nwt.get_weight("test2");
+        // auto& w3 = nwt.get_weight("test3");
+        // w1.w = iEv;
+        // w2.w = 10*iEv;
+        // w3.w = 100*iEv;
+        // w1.syst_val = {iEv + 1., iEv - 1.};
+        // w2.syst_val = {10. * iEv - 10, 10. * iEv - 20, 10. * iEv - 30};
+        // w3.syst_val = {};
+        // nwt.fill();
+        // loop_timer.click("Norm weight read + fill");
       }
       // ------- events can start be filtered from here (after saving all gen weights)
         
       // trigger requirements
-      // if (apply_trigger && !(nat.getTrgOr()) )
-	// continue;
+      if (apply_trigger && !(nat.getTrgOr()) )
+        continue;
       cutflow.add("trigger");
         
       if (save_trg_decision) {
-	      auto listOfPassedTriggers = nat.getTrgPassed();
-	        for (auto& t : listOfPassedTriggers)
-	          ot.userInt(t) = 1; // defaults are left to 0
+        auto listOfPassedTriggers = nat.getTrgPassed();
+        for (auto& t : listOfPassedTriggers)
+          ot.userInt(t) = 1; // defaults are left to 0
       }
       loop_timer.click("Trigger");
 
@@ -475,10 +504,10 @@ int main(int argc, char** argv)
 
       // signal-specific gen info
       if (is_signal){
-	sbf.select_gen_particles   (nat, ei);
-	sbf.match_genbs_to_genjets (nat, ei);
-	sbf.match_genbs_genjets_to_reco (nat, ei);
-	loop_timer.click("Signal gen level");
+        sbf.select_gen_particles   (nat, ei);
+        sbf.match_genbs_to_genjets (nat, ei);
+        sbf.match_genbs_genjets_to_reco (nat, ei);
+        loop_timer.click("Signal gen level");
       }
 
       // jet selections
@@ -489,185 +518,265 @@ int main(int argc, char** argv)
       loop_timer.click("All jets copy");
 
       if (!is_data){
-	if (do_jes_shift)
-	  all_jets = jt.jec_shift_jets(nat, all_jets, dir_jes_shift_is_up);
-	all_jets = jt.smear_jets(nat, all_jets, jer_var, bjer_var);
-	loop_timer.click("JEC + JER");
+        if (do_jes_shift)
+          all_jets = jt.jec_shift_jets(nat, all_jets, dir_jes_shift_is_up);
+        all_jets = jt.smear_jets(nat, all_jets, jer_var, bjer_var);
+        loop_timer.click("JEC + JER");
       }
 
-      // cutflow analysis 
-      const double pt_min  = 20.;
-      const double eta_max = 2.5;
-      const int    pf_id   = 1;
-      const int    pu_id   = 1;
+      // // cutflow analysis 
+      // const double pt_min  = 20.;
+      // const double eta_max = 2.5;
+      // const int    pf_id   = 1;
+      // const int    pu_id   = 1;
 
-      int n_pt = 0;
-      int n_eta = 0;
-      int n_pf = 0;
-      int n_pu = 0;
+      // int n_pt = 0;
+      // int n_eta = 0;
+      // int n_pf = 0;
+      // int n_pu = 0;
 
-      for (unsigned int ij = 0; ij < all_jets.size(); ++ij)
-        {
-          const Jet& jet = all_jets.at(ij);
-          if (jet.get_pt()            <= pt_min)  continue;
-          n_pt++;
-          if (std::abs(jet.get_eta()) >= eta_max) continue;
-          n_eta++;
-          // if (jet.get_btag() <= btag_min) continue;
-          if (!sbf.checkBit(jet.get_id(), pf_id)) continue;
-          n_pf++;
-          if (!sbf.checkBit(jet.get_puid(),  pu_id)) continue;
-          n_pu++;
+      // for (unsigned int ij = 0; ij < all_jets.size(); ++ij)
+      //   {
+      //     const Jet& jet = all_jets.at(ij);
+      //     if (jet.get_pt()            <= pt_min)  continue;
+      //     n_pt++;
+      //     if (std::abs(jet.get_eta()) >= eta_max) continue;
+      //     n_eta++;
+      //     // if (jet.get_btag() <= btag_min) continue;
+      //     if (!sbf.checkBit(jet.get_id(), pf_id)) continue;
+      //     n_pf++;
+      //     if (!sbf.checkBit(jet.get_puid(),  pu_id)) continue;
+      //     n_pu++;
+      //   }
+      // if (n_pt > 5) {
+      //     cutflow.add("pT < 20 GeV");
+      //     if (n_eta > 5) {
+      //       cutflow.add("|eta| < 2.5");
+      //       if (n_pf > 5) {
+      //         cutflow.add("jetID");
+      //           if (n_pu > 5) {
+      //             cutflow.add("PUID");
+      //           }
+      //       }
+      //     }
+      //   }
+
+      // std::vector<Jet> presel_jets = sbf.preselect_jets   (nat, all_jets);
+      sbf.btag_bias_pt_sort(all_jets);
+      // int n_presel_jet = presel_jets.size();
+      // int nfound_presel = sbf.n_gjmatched_in_jetcoll(nat, ei, presel_jets);
+      sbf.match_signal_recojets(ei,all_jets);
+      // ot.userInt("nfound_presel") = nfound_presel;
+
+      // std::vector<DiJet> all_higgs;
+      // std::vector<DiJet> nn_higgs;
+      // if (n_presel_jet >= 6) {
+	// Make sure there are 6 jets to be able to do the pairings
+	// all_higgs = sbf.get_tri_higgs_D_HHH(presel_jets);
+	// nn_higgs = sbf.get_tri_higgs_NN(ei,presel_jets,n_6j_classifier,n_2j_classifier,h,h_s,h_s_hi,h_top6_score,h_top6_signal,h_top6_nn_score,h_mass_score,h_mass_score_s,h2_correct,h2_incorrect,h3d_correct,h3d_incorrect);
+      // }
+        
+      //////////////////////////////////////////
+      /// MONTE CARLO
+      //////////////////////////////////////////
+      if (!is_data) {
+        std::vector<GenJet> all_genjets = sbf.get_all_genjets(nat);
+        // sbf.match_genjets_to_reco(all_genjets,presel_jets);
+        sbf.match_genjets_to_reco(all_genjets,all_jets);
+
+        if (skim_type == ksixb) {
+          sbf.match_signal_genjets(ei,all_genjets);
         }
-      if (n_pt > 5) {
-          cutflow.add("pT < 20 GeV");
-          if (n_eta > 5) {
-            cutflow.add("|eta| < 2.5");
-            if (n_pf > 5) {
-              cutflow.add("jetID");
-                if (n_pu > 5) {
-                  cutflow.add("PUID");
-                }
-            }
+            
+        ei.genjet_list = all_genjets;
+      }
+        
+      ei.jet_list = all_jets;
+      // ei.jet_list = presel_jets;
+      ei.n_jet = all_jets.size();
+      
+      std::vector<DiJet> dijets;
+
+      int n_jets = all_jets.size();
+      std::vector<int> dijet_id1;
+      std::vector<int> dijet_id2;
+      for (int i=0; i < n_jets-1; i++)
+        {
+          for (int j=i+1; j < n_jets; j++) {
+            std::vector<int> combo = {i, j};
+            std::vector<float> input = build_2jet_classifier_input(all_jets,combo);
+            float score = n_2j_classifier.evaluate(input)[0];
+            int ind1 = combo[0];
+            int ind2 = combo[1];
+            DiJet dijet(all_jets[ind1],all_jets[ind2]);
+            dijet.set_2j_score(score);
+            dijet.set_id1(ind1);
+            dijet.set_id2(ind2);
+            dijets.push_back(dijet);
           }
         }
+      ei.dijet_list = dijets;
+      
+      if (all_jets.size() < 6) {
+        ei.scores_6j = {};
+        ei.mass_6j = {};
+        ei.sixb_combo = {};
+        continue;}
 
-      std::vector<Jet> presel_jets = sbf.preselect_jets   (nat, all_jets);
-      sbf.btag_bias_pt_sort(presel_jets);
-      int n_presel_jet = presel_jets.size();
-      int nfound_presel = sbf.n_gjmatched_in_jetcoll(nat, ei, presel_jets);
-      sbf.match_signal_recojets(ei,presel_jets);
-      ot.userInt("nfound_presel") = nfound_presel;
 
-      std::vector<DiJet> all_higgs;
-      std::vector<DiJet> nn_higgs;
-      if (n_presel_jet >= 6) {
-	// Make sure there are 6 jets to be able to do the pairings
-	all_higgs = sbf.get_tri_higgs_D_HHH(presel_jets);
-	nn_higgs = sbf.get_tri_higgs_NN(ei,presel_jets,n_6j_classifier,n_2j_classifier);
-            
-	ei.n_higgs = all_higgs.size();
-	ei.t6_higgs_list = all_higgs;
+      std::vector<float> scores_6j;
+      std::vector<float> mass_6j;
+      std::vector<int> sixb_combo;
 
-  ei.t6_jet_list = t6_jet_list;
-
-	ei.n_nn_higgs = nn_higgs.size();
-	ei.nn_higgs_list = nn_higgs;
+      for (int i=0; i<n_jets-5; i++){
+      for (int j=i+1; j<n_jets-4; j++) {
+      for (int k=j+1; k<n_jets-3; k++) {
+      for (int ii=k+1; ii<n_jets-2; ii++) {
+      for (int jj=ii+1; jj<n_jets-1; jj++) {
+      for (int kk=jj+1; kk<n_jets; kk++) {
+          std::vector<int> combo = {i, j, k, ii, jj, kk};
+          std::vector<float> input = build_6jet_classifier_input(all_jets,combo);
+          float score = n_6j_classifier.evaluate(input)[0];
+          scores_6j.push_back(score);
+          int ind1 = combo[0];
+          int ind2 = combo[1];
+          int ind3 = combo[2];
+          int ind4 = combo[3];
+          int ind5 = combo[4];
+          int ind6 = combo[5];
+          int idx1 = all_jets[ind1].get_signalId();
+          int idx2 = all_jets[ind2].get_signalId();
+          int idx3 = all_jets[ind3].get_signalId();
+          int idx4 = all_jets[ind4].get_signalId();
+          int idx5 = all_jets[ind5].get_signalId();
+          int idx6 = all_jets[ind6].get_signalId();
+          p4_t com = all_jets[ind1].P4Regressed() + all_jets[ind2].P4Regressed() + all_jets[ind3].P4Regressed() + all_jets[ind4].P4Regressed() + all_jets[ind5].P4Regressed() + all_jets[ind6].P4Regressed();
+          float com_m = com.M();
+          mass_6j.push_back(com_m);
+          if ((idx1 > -1) && (idx2 > -1) && (idx3 > -1) && (idx4 > -1) && (idx5 > -1) && (idx6 > -1)) {sixb_combo.push_back(1);}
+          else {sixb_combo.push_back(0);}
+        }}}}}
       }
-        
-      if (!is_data) {
-	std::vector<GenJet> all_genjets = sbf.get_all_genjets(nat);
-	sbf.match_genjets_to_reco(all_genjets,presel_jets);
-
-	if (skim_type == ksixb) {
-	  sbf.match_signal_genjets(ei,all_genjets);
-	}
+      ei.scores_6j = scores_6j;
+      ei.mass_6j = mass_6j;
+      ei.sixb_combo = sixb_combo;
             
-	ei.genjet_list = all_genjets;
-      }
-        
-      EventShapeCalculator esc(presel_jets);
-      EventShapes event_shapes = esc.get_sphericity_shapes();
-      ei.event_shapes = event_shapes;
-        
-      ei.jet_list = presel_jets;
-      ei.n_jet = n_presel_jet;
+      // std::vector<int> njet_btagwp = {0,0,0};
+      // for (Jet& jet : presel_jets)
+      //   {
+      //     float btag = jet.get_btag();
+      //     for (int i = 0; i < 3; i++)
+      //       if ( btag > btag_WPs[i] )
+      //         njet_btagwp[i] += 1;
+      //   }
 
-
-      float jet6_btagsum = 0.0;
-      for (unsigned int i = 0; i < TMath::Min(6,n_presel_jet); i++) jet6_btagsum += presel_jets[i].get_btag();
-      ot.userFloat("jet6_btagsum") = jet6_btagsum;
-            
-      std::vector<int> njet_btagwp = {0,0,0};
-      for (Jet& jet : presel_jets)
-	{
-	  float btag = jet.get_btag();
-	  for (int i = 0; i < 3; i++)
-	    if ( btag > btag_WPs[i] )
-	      njet_btagwp[i] += 1;
-	}
-
-      ot.userInt("nloose_btag") = njet_btagwp[0];
-      ot.userInt("nmedium_btag") = njet_btagwp[1];
-      ot.userInt("ntight_btag") = njet_btagwp[2];
+      // ot.userInt("nloose_btag") = njet_btagwp[0];
+      // ot.userInt("nmedium_btag") = njet_btagwp[1];
+      // ot.userInt("ntight_btag") = njet_btagwp[2];
         
       loop_timer.click("Preselection");
-
-      if (skim_type == kqcd){
-            
-	if (presel_jets.size() < 2)
-	  continue;
-	cutflow.add("npresel_jets>=2");
-
-	if (njet_btagwp[2] < 2)
-	  continue;
-	cutflow.add("ntight_btag>=2");
-            
-	if ( presel_jets[0].get_pt() <= 40 || presel_jets[1].get_pt() <= 40 )
-	  continue;
-	cutflow.add("top2_jet_pt>40");
-            
-	loop_timer.click("QCD selection");
-      }
-
+      //////////////////////////////////////////
+      /// SIXB
+      //////////////////////////////////////////
       if (skim_type == ksixb){
-	// if (presel_jets.size() < 6)
-	//   continue;
-	cutflow.add("npresel_jets>=6");
+        // if (presel_jets.size() < 6)
+          // continue;
 
-	// if ( applyJetCuts && !sbf.pass_jet_cut(cutflow,pt_cuts,btagWP_cuts,presel_jets) )
-	//   continue;
-            
-	std::vector<Jet> sixb_jets = sbf.select_sixb_jets(nat, presel_jets);
-	int nfound_sixb = sbf.n_gjmatched_in_jetcoll(nat, ei, sixb_jets);
-	ot.userInt("nfound_sixb")   = nfound_sixb;
-	loop_timer.click("Six b selection");
+        // if ( applyJetCuts && !sbf.pass_jet_cut(cutflow,pt_cuts,btagWP_cuts,presel_jets) )
+        //   continue;
+
+        // std::vector<Jet> t6_jets = sbf.get_6jet_top(presel_jets);
+        // std::vector<DiJet> t6_dijets = sbf.get_tri_higgs_D_HHH(t6_jets);
+
+        // EventShapeCalculator t6_esc(t6_jets);
+        // EventShapes t6_event_shapes = t6_esc.get_sphericity_shapes();
+        // ei.t6_event_shapes = t6_event_shapes;
+      
+        // float t6_jet_btagsum = 0;
+        // for (Jet& j : t6_jets) t6_jet_btagsum += j.get_btag();
+        // ot.userFloat("t6_jet_btagsum") = t6_jet_btagsum;
+      
+        // int nfound_t6_h = sbf.n_gjmatched_in_dijetcoll(t6_dijets);
+        // int nfound_t6 = sbf.n_gjmatched_in_jetcoll(nat, ei, t6_jets); 
+
+        // std::vector<Jet> nn_jets = sbf.get_6jet_NN(ei,presel_jets,n_6j_classifier,h,h_s,h_s_hi,h_top6_score,h_top6_signal,h_top6_nn_score,h_mass_score,h_mass_score_s);
+        // std::vector<DiJet> nn_dijets = sbf.get_2jet_NN(ei,nn_jets,n_2j_classifier,h2_correct,h2_incorrect,h3d_correct,h3d_incorrect); 
+        // // std::vector<DiJet> nn_dijets = sbf.get_3dijet_NN(ei,nn_jets,n_3d_classifier);
+
+        // EventShapeCalculator nn_esc(nn_jets);
+        // EventShapes nn_event_shapes = nn_esc.get_sphericity_shapes();
+        // ei.nn_event_shapes = nn_event_shapes;
+      
+        // float nn_jet_btagsum = 0;
+        // for (Jet& j : nn_jets) nn_jet_btagsum += j.get_btag();
+        // ot.userFloat("nn_jet_btagsum") = nn_jet_btagsum;
+        
+        // int nfound_nn_h = sbf.n_gjmatched_in_dijetcoll(nn_dijets);
+        // int nfound_nn = sbf.n_gjmatched_in_jetcoll(nat, ei, nn_jets);
+        
+        // ot.userInt("nfound_t6")   = nfound_t6;
+        // ot.userInt("nfound_t6_h") = nfound_t6_h;
+        // ot.userInt("nfound_nn")   = nfound_nn;
+        // ot.userInt("nfound_nn_h") = nfound_nn_h;
+
+        // ei.t6_jet_list = t6_jets;
+        // ei.t6_higgs_list = t6_dijets;
+        // ei.n_higgs = t6_dijets.size();
+
+        // ei.nn_jet_list = nn_jets;
+        // ei.nn_higgs_list = nn_dijets;
+        
+        loop_timer.click("Six b selection");
       }
-
+//////////////////////////////////////////
+/// CONTROL REGION
+//////////////////////////////////////////
       if (skim_type == khiggscr){
-	if (presel_jets.size() < 6)
-	  continue;
-	cutflow.add("npresel_jets>=6");
+        // if (presel_jets.size() < 6)
+        //   continue;
+        // cutflow.add("npresel_jets>=6");
 
-	if ( applyJetCuts && !sbf.pass_jet_cut(cutflow,pt_cuts,btagWP_cuts,presel_jets) )
-	  continue;
+        // if ( applyJetCuts && !sbf.pass_jet_cut(cutflow,pt_cuts,btagWP_cuts,presel_jets) )
+        //   continue;
 
-	if ( !sbf.pass_higgs_cr(all_higgs) )
-	  continue;
-	cutflow.add("higgs_veto_cr");
+        // if ( !sbf.pass_higgs_cr(all_higgs) )
+        //   continue;
+        // cutflow.add("higgs_veto_cr");
 
-	if ( jet6_btagsum >= 3.8 )
-	  continue;
-	cutflow.add("jet6_btagsum<3.8");
+        // if ( jet6_btagsum >= 3.8 )
+        //   continue;
+        // cutflow.add("jet6_btagsum<3.8");
             
-	loop_timer.click("Higgs CR selection");
+        loop_timer.click("Higgs CR selection");
       }
- 
+ //////////////////////////////////////////
+/// TTBAR
+//////////////////////////////////////////
       if (skim_type == kttbar){
-	if (presel_jets.size() < 2)
-	  continue;
-	cutflow.add("npresel_jets>=2");
+        // if (presel_jets.size() < 2)
+        //   continue;
+        // cutflow.add("npresel_jets>=2");
             
-	std::vector<Jet> ttjets = sbf.select_ttbar_jets(nat, ei, presel_jets); // ttjets sorted by DeepJet
-	double deepjet1 = get_property(ttjets.at(0), Jet_btagDeepFlavB);
-	double deepjet2 = get_property(ttjets.at(1), Jet_btagDeepFlavB);
-	int nbtag = 0;
-	if (deepjet1 > btag_WPs.at(bTagWP)) nbtag += 1;
-	if (deepjet2 > btag_WPs.at(bTagWP)) nbtag += 1;
-	if (nbtag < nMinBtag)
-	  continue;
-	cutflow.add("ttbar_jet_cut");
-	if (!is_data)
-	  ei.btagSF_WP_M = btsf.get_SF_allJetsPassWP({ttjets.at(0), ttjets.at(1)}, BtagSF::btagWP::medium);
-	loop_timer.click("ttbar b jet selection");
+        // std::vector<Jet> ttjets = sbf.select_ttbar_jets(nat, ei, presel_jets); // ttjets sorted by DeepJet
+        // double deepjet1 = get_property(ttjets.at(0), Jet_btagDeepFlavB);
+        // double deepjet2 = get_property(ttjets.at(1), Jet_btagDeepFlavB);
+        // int nbtag = 0;
+        // if (deepjet1 > btag_WPs.at(bTagWP)) nbtag += 1;
+        // if (deepjet2 > btag_WPs.at(bTagWP)) nbtag += 1;
+        // if (nbtag < nMinBtag)
+        //   continue;
+        // cutflow.add("ttbar_jet_cut");
+        // if (!is_data)
+        //   ei.btagSF_WP_M = btsf.get_SF_allJetsPassWP({ttjets.at(0), ttjets.at(1)}, BtagSF::btagWP::medium);
+        // loop_timer.click("ttbar b jet selection");
       }
 
       sbf.select_leptons(nat, ei);
       loop_timer.click("Lepton selection");
 
       if (!is_data){
-	su::copy_gen_weights(ot, nwt);
-	loop_timer.click("Read and copy gen weights");
+        su::copy_gen_weights(ot, nwt);
+        loop_timer.click("Read and copy gen weights");
       }
 
       su::fill_output_tree(ot, nat, ei);
@@ -677,6 +786,16 @@ int main(int argc, char** argv)
 
   outputFile.cd();
   cutflow.write(outputFile);
+  // h.Write();
+  // h_s.Write();
+  // h_s_hi.Write();
+  // h_top6_score.Write();
+  // h_top6_signal.Write();
+  // h_top6_nn_score.Write();
+  // h_mass_score.Write();
+  // h_mass_score_s.Write();
+  // h3d_incorrect.Write();
+  // h3d_correct.Write();
   ot.write();
   // if (!is_data)
   // nwt.write();

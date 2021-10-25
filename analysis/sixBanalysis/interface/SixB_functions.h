@@ -4,6 +4,7 @@
 #include "NanoAODTree.h"
 #include "EventInfo.h"
 #include "Cutflow.h"
+#include "Classifier.h"
 
 #include "Jet.h"
 #include "GenJet.h"
@@ -12,6 +13,7 @@
 #include "DiJet.h"
 
 #include "EvalNN.h"
+#include "TH2F.h"
 
 class SixB_functions{
     
@@ -78,12 +80,12 @@ template <typename T>
   std::vector<DiJet> get_tri_higgs_D_HHH(std::vector<Jet>& in_jets);
 
   std::vector<Jet> get_6jet_top(std::vector<Jet>& in_jets);
-  std::vector<Jet> get_6jet_NN(EventInfo& ei,std::vector<Jet>& in_jets,EvalNN& n_6j_classifier);
+  std::vector<Jet> get_6jet_NN(EventInfo& ei,std::vector<Jet>& in_jets,EvalNN& n_6j_classifier,TH1F& h,TH1F& h_s,TH1F& h_s_hi,TH1F& h_top6_score,TH1F& h_top6_signal,TH1F& h_top6_nn_score, TH2F& h_mass_score,TH2F& h_mass_score_s);
 
   
-  std::vector<DiJet> get_2jet_NN(EventInfo& ei,std::vector<Jet>& in_jets,EvalNN& n_2j_classifier);
+  std::vector<DiJet> get_2jet_NN(EventInfo& ei,std::vector<Jet>& in_jets,EvalNN& n_2j_classifier,TH1F& h2_correct,TH1F& h2_incorrect,TH1F& h3d_correct,TH1F& h3d_incorrect);
   std::vector<DiJet> get_3dijet_NN(EventInfo& ei,std::vector<Jet>& in_jets,EvalNN& n_3d_classifier);
-  std::vector<DiJet> get_tri_higgs_NN(EventInfo& ei,std::vector<Jet>& in_jets,EvalNN& n_6j_classifier,EvalNN& n_2j_classifier);
+  std::vector<DiJet> get_tri_higgs_NN(EventInfo& ei,std::vector<Jet>& in_jets,EvalNN& n_6j_classifier,EvalNN& n_2j_classifier,TH1F& h,TH1F& h_s,TH1F& h_s_hi,TH1F& h_top6_score,TH1F& h_top6_signal,TH1F& h_top6_nn_score, TH2F& h_mass_score,TH2F& h_mass_score_s,TH1F& h2_correct,TH1F& h2_incorrect,TH1F& h3d_correct,TH1F& h3d_incorrect);
 
   // passes event if all dijets mass is greater than 30 from higgs mass
   bool pass_higgs_cr(const std::vector<DiJet>& in_dijets);

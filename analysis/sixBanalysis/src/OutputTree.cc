@@ -66,7 +66,7 @@ using namespace std;
   tree_->Branch(#OBJ "_qgl", &OBJ ## _qgl);			\
   tree_->Branch(#OBJ "_id", &OBJ ## _id);			\
   tree_->Branch(#OBJ "_puid", &OBJ ## _puid);			\
-  tree_->Branch(#OBJ "_preselIdx", &OBJ ## _preselIdx);
+  // tree_->Branch(#OBJ "_preselIdx", &OBJ ## _preselIdx);
 
 #define CLEAR_jet_list(OBJ)			\
   OBJ ## _E.clear();				\
@@ -83,7 +83,7 @@ using namespace std;
   OBJ ## _qgl.clear();				\
   OBJ ## _id.clear();				\
   OBJ ## _puid.clear();				\
-  OBJ ## _preselIdx.clear();
+  // OBJ ## _preselIdx.clear();
 
 #define BRANCH_dijet_list(OBJ)				\
   tree_->Branch(#OBJ "_pt", &OBJ ## _pt);		\
@@ -91,8 +91,11 @@ using namespace std;
   tree_->Branch(#OBJ "_phi", &OBJ ## _phi);		\
   tree_->Branch(#OBJ "_m", &OBJ ## _m);			\
   tree_->Branch(#OBJ "_E", &OBJ ## _E);			\
+  tree_->Branch(#OBJ "_dr", &OBJ ## _dr);		\
   tree_->Branch(#OBJ "_signalId", &OBJ ## _signalId);	\
-  tree_->Branch(#OBJ "_2j_score", &OBJ ## _2j_score);           
+  tree_->Branch(#OBJ "_2j_score", &OBJ ## _2j_score); \         
+  tree_->Branch(#OBJ "_id1", &OBJ ## _id1); \        
+  tree_->Branch(#OBJ "_id2", &OBJ ## _id2);           
 
 #define CLEAR_dijet_list(OBJ)			\
   OBJ ## _pt.clear();				\
@@ -100,8 +103,11 @@ using namespace std;
   OBJ ## _phi.clear();				\
   OBJ ## _m.clear();				\
   OBJ ## _E.clear();				\
+  OBJ ## _dr.clear();				\
   OBJ ## _signalId.clear();			\
-  OBJ ## _2j_score.clear();           
+  OBJ ## _2j_score.clear();   \        
+  OBJ ## _id1.clear();   \        
+  OBJ ## _id2.clear();   \        
   
 
 OutputTree::OutputTree(bool savetlv, std::map<std::string, bool> branch_switches, string name, string title) :
@@ -125,6 +131,10 @@ void OutputTree::init_branches(std::map<std::string, bool> branch_switches)
   tree_->Branch("Run",     &Run);
   tree_->Branch("LumiSec", &LumiSec);
   tree_->Branch("Event",   &Event);
+
+  tree_->Branch("scores_6j",   &scores_6j);
+  tree_->Branch("mass_6j",   &mass_6j);
+  tree_->Branch("score_combo",   &mass_6j);
 
   tree_->Branch("n_other_pv",     &n_other_pv);
   tree_->Branch("rhofastjet_all", &rhofastjet_all);
@@ -210,17 +220,18 @@ void OutputTree::init_branches(std::map<std::string, bool> branch_switches)
       tree_->Branch("n_jet",         &n_jet);
 
       BRANCH_jet_list(jet);
-      BRANCH_jet_list(t6_jet);
+      // BRANCH_jet_list(t6_jet);
       
-      tree_->Branch("b_6j_score",    &b_6j_score);
-      BRANCH_jet_list(nn_jet);
+      // tree_->Branch("b_6j_score",    &b_6j_score);
+      // BRANCH_jet_list(nn_jet);
 
-      tree_->Branch("n_higgs", &n_higgs);
+      // tree_->Branch("n_higgs", &n_higgs);
       
-      BRANCH_dijet_list(t6_higgs);
+      // BRANCH_dijet_list(t6_higgs);
+      BRANCH_dijet_list(dijet);
       
-      tree_->Branch("b_3d_score",    &b_3d_score);
-      BRANCH_dijet_list(nn_higgs);
+      // tree_->Branch("b_3d_score",    &b_3d_score);
+      // BRANCH_dijet_list(nn_higgs);
     }
 
   if (is_enabled("gen_brs"))
@@ -247,13 +258,17 @@ void OutputTree::init_branches(std::map<std::string, bool> branch_switches)
 	}
     }
 
-  if (is_enabled("shape_brs"))
-    {
-      std::cout << "[INFO] OutputTree : enabling shape-only related branches" << std::endl;
-      tree_->Branch("sphericity",  &sphericity);
-      tree_->Branch("sphericity_t",&sphericity_t);
-      tree_->Branch("aplanarity",  &aplanarity);
-    }
+  // if (is_enabled("shape_brs"))
+  //   {
+  //     std::cout << "[INFO] OutputTree : enabling shape-only related branches" << std::endl;
+  //     tree_->Branch("t6_sphericity",  &t6_sphericity);
+  //     tree_->Branch("t6_sphericity_t",&t6_sphericity_t);
+  //     tree_->Branch("t6_aplanarity",  &t6_aplanarity);
+      
+  //     tree_->Branch("nn_sphericity",  &nn_sphericity);
+  //     tree_->Branch("nn_sphericity_t",&nn_sphericity_t);
+  //     tree_->Branch("nn_aplanarity",  &nn_aplanarity);
+  //   }
 
 	
 
@@ -275,6 +290,10 @@ void OutputTree::clear()
   n_genjet = 0;
   n_higgs = 0;
 
+  scores_6j.clear();
+  mass_6j.clear();
+  sixb_combo.clear();
+
   b_6j_score = 0;
   b_3d_score = 0;
 
@@ -289,11 +308,12 @@ void OutputTree::clear()
   genjet_recoIdx.clear();
 
   CLEAR_jet_list(jet);
-  CLEAR_jet_list(t6_jet);
-  CLEAR_jet_list(nn_jet);
+  // CLEAR_jet_list(t6_jet);
+  // CLEAR_jet_list(nn_jet);
 
-  CLEAR_dijet_list(t6_higgs);
-  CLEAR_dijet_list(nn_higgs);
+  CLEAR_dijet_list(dijet);
+  // CLEAR_dijet_list(t6_higgs);
+  // CLEAR_dijet_list(nn_higgs);
 
   CLEAR_m_pt_eta_phi_p4(gen_X_fc);
   CLEAR_m_pt_eta_phi_p4(gen_X);

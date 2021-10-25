@@ -37,10 +37,10 @@ struct EventInfo{
   boost::optional<int>    n_jet;
   boost::optional<int>    n_genjet;
   boost::optional<int>    n_higgs;
-  boost::optional<int>    n_nn_higgs;
+  // boost::optional<int>    n_nn_higgs;
 
-  boost::optional<float>  b_6j_score;
-  boost::optional<float>  b_3d_score;
+  // boost::optional<float>  b_6j_score;
+  // boost::optional<float>  b_3d_score;
 
   boost::optional<GenPart>  gen_X_fc; // first copy at LHE
   boost::optional<GenPart>  gen_X;
@@ -89,12 +89,17 @@ struct EventInfo{
 
   boost::optional< std::vector<GenJet> > genjet_list;
   boost::optional< std::vector<Jet> > jet_list;
-  boost::optional< std::vector<Jet> > t6_jet_list;
-  boost::optional< std::vector<Jet> > nn_jet_list;
-  boost::optional< std::vector<DiJet> > t6_higgs_list;
-  boost::optional< std::vector<DiJet> > nn_higgs_list;
+  boost::optional< std::vector<DiJet> > dijet_list;
+  boost::optional< std::vector<float> > scores_6j;
+  boost::optional< std::vector<float> > mass_6j;
+  boost::optional< std::vector<int> > sixb_combo;
+  // boost::optional< std::vector<Jet> > t6_jet_list;
+  // boost::optional< std::vector<Jet> > nn_jet_list;
+  // boost::optional< std::vector<DiJet> > t6_higgs_list;
+  // boost::optional< std::vector<DiJet> > nn_higgs_list;
 
-  boost::optional<EventShapes> event_shapes;
+  // boost::optional<EventShapes> t6_event_shapes;
+  // boost::optional<EventShapes> nn_event_shapes;
 
   // for ttbar skims
   boost::optional<Jet> bjet1;

@@ -27,6 +27,9 @@ float get_dijet_dr(const Jet& j1,const Jet& j2)
 float get_dijet_pt(const Jet& j1,const Jet& j2)
 {
   return (j1.P4Regressed()+j2.P4Regressed()).Pt();
+  // return (j1.P4Regressed()+j2.P4Regressed()).Eta();
+  // return (j1.P4Regressed()+j2.P4Regressed()).Phi();
+  // return (j1.P4Regressed()+j2.P4Regressed()).M();
 }
 
 std::vector<float> build_6jet_classifier_input(std::vector<Jet> in_jets)
@@ -44,10 +47,16 @@ std::vector<float> build_6jet_classifier_input(std::vector<Jet> in_jets)
   for (Jet& j : in_jets)
     {
       input_matrix[0].push_back( j.get_pt() );
+      // input_matrix[0].push_back( j.get_pt()*j.get_pt() );
       input_matrix[1].push_back( j.get_eta() );
+      // input_matrix[1].push_back( j.get_eta()*j.get_eta() );
       input_matrix[2].push_back( j.get_phi() );
+      // input_matrix[2].push_back( j.get_phi()*j.get_phi() );
       input_matrix[3].push_back( j.get_btag() );
       input_matrix[4].push_back( (j.P4Regressed() - com).Pt() );
+      // input_matrix[4].push_back( (j.P4Regressed() - com).Eta() );
+      // input_matrix[4].push_back( (j.P4Regressed() - com).Phi() );
+      // input_matrix[4].push_back( (j.P4Regressed() - com).M() );
     }
 
   for ( std::vector<float> input : input_matrix ) input_array.insert(input_array.end(),input.begin(),input.end());
@@ -84,8 +93,11 @@ std::vector<float> build_3dijet_classifier_input(std::vector<Jet> in_jets)
       for (Jet& j : jet_pair)
 	{
 	  input_matrix[0].push_back( j.get_pt() );
+	  // input_matrix[0].push_back( j.get_pt()*j.get_pt() );
 	  input_matrix[1].push_back( j.get_eta() );
+	  // input_matrix[1].push_back( j.get_eta()*j.get_eta() );
 	  input_matrix[2].push_back( j.get_phi() );
+	  // input_matrix[2].push_back( j.get_phi()*j.get_phi() );
 	  input_matrix[3].push_back( j.get_btag() );
 	}
       input_matrix[4].push_back( get_dijet_pt(jet_pair[0],jet_pair[1]) );
