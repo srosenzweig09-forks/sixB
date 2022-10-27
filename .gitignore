@@ -2,3 +2,4 @@ FullSim/*
 GenNtuplizer/*
 Madgraph/*
 PythiaAndNtuples/*
+*.root
