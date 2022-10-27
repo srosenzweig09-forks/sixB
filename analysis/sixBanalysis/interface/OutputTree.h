@@ -240,12 +240,12 @@ public:
   DECLARE_m_pt_eta_phi_p4(gen_H2_b1_genjet);
   DECLARE_m_pt_eta_phi_p4(gen_H2_b2_genjet);
 
-  DECLARE_m_pt_ptRegressed_eta_phi_p4(gen_HX_b1_recojet);
-  DECLARE_m_pt_ptRegressed_eta_phi_p4(gen_HX_b2_recojet);
-  DECLARE_m_pt_ptRegressed_eta_phi_p4(gen_H1_b1_recojet);
-  DECLARE_m_pt_ptRegressed_eta_phi_p4(gen_H1_b2_recojet);
-  DECLARE_m_pt_ptRegressed_eta_phi_p4(gen_H2_b1_recojet);
-  DECLARE_m_pt_ptRegressed_eta_phi_p4(gen_H2_b2_recojet);
+  DECLARE_m_pt_ptRegressed_eta_phi_DeepJet_p4(gen_HX_b1_recojet);
+  DECLARE_m_pt_ptRegressed_eta_phi_DeepJet_p4(gen_HX_b2_recojet);
+  DECLARE_m_pt_ptRegressed_eta_phi_DeepJet_p4(gen_H1_b1_recojet);
+  DECLARE_m_pt_ptRegressed_eta_phi_DeepJet_p4(gen_H1_b2_recojet);
+  DECLARE_m_pt_ptRegressed_eta_phi_DeepJet_p4(gen_H2_b1_recojet);
+  DECLARE_m_pt_ptRegressed_eta_phi_DeepJet_p4(gen_H2_b2_recojet);
   // End Gen 6B Objects
 
   
