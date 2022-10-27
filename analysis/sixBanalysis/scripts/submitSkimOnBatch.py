@@ -3,6 +3,7 @@
 import condortools.inputsplit as inputtools
 import condortools.eostools as eostools
 import condortools.scriptgen as scripttools
+import subprocess, shlex
 
 import os
 import sys
@@ -25,6 +26,8 @@ parser.add_argument('--dryrun',         dest='submitjobs',   help='make all prep
 # every argument that is unknown is forwarded to the skimmer
 # pay attention not to define argparse keys that are also used by the skimmer - apart from those handled in the code
 args, unknown = parser.parse_known_args()
+
+subprocess.call(shlex.split('make exe -j'))
 
 #### the output is saved in
 #### odir / tag / oname
