@@ -1,8 +1,8 @@
 ODIR="/store/user/srosenzw/sixb/ntuples/Summer2018UL/"
 
 # . scripts/arg_submit.sh -v qcd "$@"
-TAG="dHHH_pairs"
-CFG="config/skim_ntuple_2018.cfg"
+TAG="dnn"
+CFG="config/skim_ntuple_2018_marina.cfg"
 
 make exe -j || exit -1
 

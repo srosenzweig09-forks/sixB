@@ -65,4 +65,4 @@ for input in ${files[@]}; do
     python scripts/submitSkimOnBatch.py --tag $TAG --outputDir $ODIR --cfg $CFG --njobs 100 --input $input --is-signal --forceOverwrite "$EXTRA"
 done
 
-# python scripts/submitSkimOnBatch.py --tag studies --outputDir /store/user/srosenzw/sixb/ntuples/Summer2018UL/ --cfg config/skim_ntuple_2018_presel.cfg --njobs 100 --input input/PrivateMC_2018/NMSSM_XYH_YToHH_6b/NMSSM_XYH_YToHH_6b_MX_700_MY_400_10M.txt --is-signal
+# make exe -j; python scripts/submitSkimOnBatch.py --tag NMSSM_cutflow_studies/presel --outputDir /store/user/srosenzw/sixb/ntuples/Summer2018UL/ --cfg config/skim_ntuple_2018_marina.cfg --njobs 100 --input input/PrivateMC_2018/NMSSM_XYH_YToHH_6b/NMSSM_XYH_YToHH_6b_MX_1200_MY_1000.txt --is-signal
