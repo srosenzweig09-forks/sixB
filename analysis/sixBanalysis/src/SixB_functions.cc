@@ -359,73 +359,63 @@ std::vector<Jet> SixB_functions::select_sixb_jets_bias_pt_sort(NanoAODTree &nat,
     Tight, Medium, Loose and Fail categories. Within these four categories, the jets are sorted again by their pT in descending order.
   */
   
-  if (0) // For debugging
-    {
-      std::cout << "SixB_functions::select_sixb_jets_bias_pt_sort:   input jet collection (should be ordered in pT only):" << std::endl;
-      for (unsigned int ij=0; ij<in_jets.size(); ij++)
-      {
-        std::cout << " jet "<<ij<<"   pT="<<in_jets.at(ij).get_pt()<<"   b-disc.="<<in_jets.at(ij).get_btag()<<std::endl;
-      }
+  if (0) { // For debugging
+    std::cout << "SixB_functions::select_sixb_jets_bias_pt_sort:   input jet collection (should be ordered in pT only):" << std::endl;
+    for (unsigned int ij=0; ij<in_jets.size(); ij++) {
+      std::cout << " jet "<<ij<<"   pT="<<in_jets.at(ij).get_pt()<<"   b-disc.="<<in_jets.at(ij).get_btag()<<std::endl;
     }
+  }
   
   // Sort jets by their b-tagging score in descending order
   std::vector<Jet> jets = bias_pt_sort_jets(nat, ei, in_jets);
   
-  if (0) // For debugging
-    {
-      std::cout << "SixB_functions::select_sixb_jets_bias_pt_sort:  jet collection after sorting by b-tagging score and then pT within each group:"<<std::endl;
-      for (unsigned int ij=0; ij<jets.size(); ij++)
-	{
-	  std::cout << " jet "<<ij<<"   pT="<<jets.at(ij).get_pt()<<"   b-disc.="<<jets.at(ij).get_btag()<<std::endl;
-	}
+  if (0) { // For debugging
+    std::cout << "SixB_functions::select_sixb_jets_bias_pt_sort:  jet collection after sorting by b-tagging score and then pT within each group:"<<std::endl;
+    for (unsigned int ij=0; ij<jets.size(); ij++) {
+      std::cout << " jet "<<ij<<"   pT="<<jets.at(ij).get_pt()<<"   b-disc.="<<jets.at(ij).get_btag()<<std::endl;
     }
+  }
   
   // Select the first 6 jets for the pairing
   unsigned int n_out = std::min<int>(jets.size(), 6);
-  jets.resize(n_out);
+  // jets.resize(n_out);
   
   bool apply_cuts = pmap.get_param<bool>("bias_pt_sort", "applyJetCuts");
-  if (apply_cuts)
-    {
-      bool pass_cuts = true;
-      
-      std::vector<double> pt_cuts     = pmap.get_param<std::vector<double>>("bias_pt_sort", "pt_cuts");
-      std::vector<int>    btagWP_cuts = pmap.get_param<std::vector<int>>("bias_pt_sort", "btagWP_cuts");
-      
-      unsigned int ncuts = pt_cuts.size();
-      if (jets.size() < ncuts)
-	{
-	  pass_cuts = false;
-	}
-      else
-	{
-	  for (unsigned int icut = 0; icut < ncuts; icut++)
-	    {
-	      const Jet& ijet = jets[icut];
-	      double pt   = pt_cuts[icut];
-	      int btag_wp = btagWP_cuts[icut];
-	      if ( ijet.get_pt() <= pt || ijet.get_btag() <= btag_WPs[btag_wp] )
-		{
-		  // if (debug_){
-		  //   cout << "==> the jet nr " << icut << " fails cuts, jet dumped below" << endl;
-		  //   cout << getObjDescr(ijet) << endl;
-		  // }
-		  pass_cuts = false;
-		  break;
-		}
-	    }
-	}
-      if (!pass_cuts)
-	jets.resize(0); // empty this vector if cuts were not passed
+  if (apply_cuts) {
+    bool pass_cuts = true;
+    
+    std::vector<double> pt_cuts     = pmap.get_param<std::vector<double>>("bias_pt_sort", "pt_cuts");
+    std::vector<int>    btagWP_cuts = pmap.get_param<std::vector<int>>("bias_pt_sort", "btagWP_cuts");
+    
+    unsigned int ncuts = pt_cuts.size();
+    if (jets.size() < ncuts)
+      {
+        pass_cuts = false;
+      }
+    else {
+      for (unsigned int icut = 0; icut < ncuts; icut++) {
+        const Jet& ijet = jets[icut];
+        double pt   = pt_cuts[icut];
+        int btag_wp = btagWP_cuts[icut];
+        if ( ijet.get_pt() <= pt || ijet.get_btag() <= btag_WPs[btag_wp] ) {
+          // if (debug_){
+          //   cout << "==> the jet nr " << icut << " fails cuts, jet dumped below" << endl;
+          //   cout << getObjDescr(ijet) << endl;
+          // }
+          pass_cuts = false;
+          break;
+        }
+      }
+	  }
+    if (!pass_cuts)
+	    jets.resize(0); // empty this vector if cuts were not passed
     }
   
-  if (0) // For debugging
-    {
+    if (0) { // For debugging{
       std::cout << "SixB_functions: final collection of jets"<<std::endl;
-      for (unsigned int ij=0; ij<jets.size(); ij++)
-	{
-	  std::cout << " jet "<<ij<<"   pT="<<jets.at(ij).get_pt()<<"   b-disc.="<<jets.at(ij).get_btag()<<std::endl;
-	}
+      for (unsigned int ij=0; ij<jets.size(); ij++) {
+        std::cout << " jet "<<ij<<"   pT="<<jets.at(ij).get_pt()<<"   b-disc.="<<jets.at(ij).get_btag()<<std::endl;
+      }
     }
   return jets;  
 }
@@ -1018,11 +1008,32 @@ std::tuple<CompositeCandidate, CompositeCandidate, CompositeCandidate> SixB_func
   int itriH = triH_d_hhh[0].second;
   std::vector<int> idijets = triH_pairings[itriH];
 
+  // rebuild p4 with regressed pT if required
+  if (pmap.get_param<bool>("configurations", "useRegressedPtForHp4")){
+    dijets[0].rebuildP4UsingRegressedPt(true, true);
+    dijets[1].rebuildP4UsingRegressedPt(true, true);
+    dijets[2].rebuildP4UsingRegressedPt(true, true);
+  }
 
   // Order dijets by highest Pt
   std::sort(idijets.begin(),idijets.end(),[dijets](int id1,int id2){ return dijets[id1].P4().Pt() > dijets[id2].P4().Pt(); });
 
-  std::tuple<CompositeCandidate, CompositeCandidate, CompositeCandidate> higgs_cands = std::make_tuple(dijets[idijets[0]], dijets[idijets[1]], dijets[idijets[2]]);
+  vector<int> indices;
+  if (pmap.get_param<string>("configurations", "HHHOrder") == "X12") {
+    // int indices[] = {0,1,2};
+    vector<int> _indices = {0,1,2};
+    indices = _indices;
+  }
+  else if (pmap.get_param<string>("configurations", "HHHOrder") == "12X") {
+    vector<int> _indices = {2,1,0};
+    indices = _indices;
+  }
+
+  // HX assigned as dijet with highest pt, H1, then H2
+  // std::tuple<CompositeCandidate, CompositeCandidate, CompositeCandidate> higgs_cands = std::make_tuple(dijets[idijets[0]], dijets[idijets[1]], dijets[idijets[2]]);
+  
+  // H1 assigned as dijet with highest pt, H2, then HX
+  std::tuple<CompositeCandidate, CompositeCandidate, CompositeCandidate> higgs_cands = std::make_tuple(dijets[idijets[indices[0]]], dijets[idijets[indices[1]]], dijets[idijets[indices[2]]]);
 
 
   return higgs_cands;
@@ -1384,7 +1395,7 @@ int SixB_functions::n_gjmatched_in_jetcoll(NanoAODTree& nat, EventInfo& ei, cons
   for (int imj : matched_jets)
     {
       if (std::find(reco_js.begin(), reco_js.end(), imj) != reco_js.end())
-	nfound += 1;
+	    nfound += 1;
     }
   
   return nfound;
