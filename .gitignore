@@ -1,6 +1,6 @@
 FullSim/*
 GenNtuplizer/*
-Madgraph/*
+MadGraph/*
 PythiaAndNtuples/*
 *.root
 *.vscode
