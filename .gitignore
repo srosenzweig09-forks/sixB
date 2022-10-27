@@ -5,3 +5,4 @@ PythiaAndNtuples/*
 *.root
 *.vscode
 *.awkd
+analysis/sixBanalysis/scores/
