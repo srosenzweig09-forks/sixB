@@ -14,7 +14,7 @@ import sys
 
 print(".. parsing argument line")
 parser = ArgumentParser(description='Command line parser of model options and tags')
-parser.add_argument('--year', dest='year', help='conditions of which year', required=True)
+parser.add_argument('--year', dest='year', help='conditions of which year', default=2018)
 parser.add_argument('--dir', dest='dir', help='CRAB output directory', required=True)
 parser.add_argument('-a', '--analysis', dest='analysis', help='6b or 8b', required=True)
 
