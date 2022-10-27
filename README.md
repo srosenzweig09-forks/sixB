@@ -1,33 +1,19 @@
-# 6b Analysis
+# sixB
 
-## Table of Contents
-- [6b Analysis](#6b-analysis)
-  - [Table of Contents](#table-of-contents)
-  - [Install Instructions](#install-instructions)
-  - [Gridpack Generation](#gridpack-generation)
-  - [Running Instructions](#running-instructions)
-    - [LHE step](#lhe-step)
-      - [Hadronisaton and ntuple step](#hadronisaton-and-ntuple-step)
-    - [Content and description of the ntuples](#content-and-description-of-the-ntuples)
-  - [Perform Skim on NTuples](#perform-skim-on-ntuples)
-  - [HiggsCombine](#higgscombine)
+## Generator level studies
 
-## Install Instructions
+### Install instruction
 
 Note:
    * CMSSW recommended release from [here](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookWhichRelease)
    * MadGraph version as in the gen scripts [here](https://github.com/cms-sw/genproductions/blob/master/bin/MadGraph5_aMCatNLO/gridpack_generation.sh)
 
-Follow these steps to install CMSSW, MadGraph, and the BSM model
-
 ```
 # install CMSSW release
-cmsrel CMSSW_10_6_28_patch2
-cd CMSSW_10_6_28_patch2/src
-cmsenv
-git cms-addpkg CommonTools/Utils CondFormats/JetMETObjects CondFormats/Serialization FWCore/MessageLogger FWCore/Utilities JetMETCorrections/Modules PhysicsTools/TensorFlow PhysicsTools/ONNXRuntime
-scram b -j 4
+cmsrel CMSSW_10_2_18
+cd CMSSW_10_2_18/src
 git clone https://github.com/UF-HH/sixB
+cd sixB
 
 # install MadGraph
 cd MadGraph
@@ -41,19 +27,12 @@ cd models
 unzip ../NMSSMHET_UFO_fermioncouplings.zip
 ```
 
-## Gridpack Generation
+### Running instructions
 
-Sample event production can be done through the manual production of LHE events through MadGraph and hadronization of LHE events through Pythia. See [Running Instructions (Manual)](#running-instructions).
-
-Sample event production can also be done by generating a gridpack (consisting of several mass points) and using [genproductions](https://github.com/cms-sw/genproductions). See [MadGraph/gridpacks/README.md](https://github.com/UF-HH/sixB/tree/master/MadGraph/gridpacks) for instructions to generate the cards and [Quick tutorial on how to produce a gridpack](https://twiki.cern.ch/twiki/bin/viewauth/CMS/QuickGuideMadGraph5aMCatNLO#Quick_tutorial_on_how_to_produce)
-
-After running `python generate_grid.py`, navigate to the directory `sixB/MadGraph/gridpacks/genproductions/bin/MadGraph5_aMCatNLO/` and modify and run `sh generate_6b_gridpacks.sh`. This will generate the tarballs, which you can copy to `FullSim/Summer20UL18/Template/`, in which you can modify `genSim_step.py` and `crabConfig.py` and submit each Full Sim sample to CRAB via the command `crab submit crabConfig.py`.
-
-## Running Instructions
+These steps allow for generating a LHE file and run Pythia (within the CMSSW framework) on top of it.
 
 
-These steps allow for generating an LHE file and run Pythia (within the CMSSW framework) on top of it.
-### LHE step
+#### LHE step
 
 To generate the MadGraph process (needed only once) see below.
 It will generate the diagrams and copy updated run and param cards to the destination folder called ``X_YH_HHH_6b``.
@@ -92,7 +71,7 @@ This step takes approximately 90s to hadronise and ntuplise 1000 events (a few e
 For test purposes you can add at the end ``maxEvents=<num_events>`` (e.g. to run on 100 events)
 
 
-### Content and description of the ntuples
+#### Content and description of the ntuples
 
 Conventions:
    * The particles in the process are labeled as X &#8594; Y HX, and Y &#8594; HY1 HY2. The three H bosons (HX, HY1, HY2) decay to b1 b2.
@@ -103,16 +82,3 @@ Content:
    * A vector of pt/eta/phi/m of all the genjets satisfying minimal pt requirements (both in the cases where the neutrinos are clustered and are not clustered in the jet)
    * The pt/eta/phi/m of the gen particles as individual floats X, Y, HY, HY1, HY1, HY_b1, HY_b2, HY1_b1, HY1_b2, HY1_b1, HY1_b2
    * For every gen b the index of the genjet matched (matched = the closest within a cone dR = 0.4). Value ``-1`` if no match found
-
-## Perform Skim on NTuples
-
-For instructions on how to perform skims, see [analysis/sixBanalysis](https://github.com/UF-HH/sixB/tree/master/analysis/sixBanalysis).
-
-## HiggsCombine
-
-See [this page](https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/#for-end-users-that-dont-need-to-commit-or-do-any-development) for instructions on how to install and run Combine ([HiggsAnalysis-CombinedLimit GitHub](https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit))
-
-Notes:
-- Documentation recommends using CMSSW_10_2_18 to run Combine
-- Must start a new shell to run Combine (i.e., no cms environments)
-- 
