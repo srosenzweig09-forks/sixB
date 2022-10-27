@@ -3,3 +3,5 @@ GenNtuplizer/*
 Madgraph/*
 PythiaAndNtuples/*
 *.root
+*.vscode
+*.awkd
